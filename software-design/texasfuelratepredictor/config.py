@@ -1,7 +1,6 @@
 import os
 
 class Config:
-   # SECRET_KEY = 'a76ec8d1721261cd9d85cc681a05d69f' # os.environ.get('SECRET_KEY')
     SECRET_KEY = os.environ.get('SECRET_KEY')
     SQLALCHEMY_DATABASE_URI = os.environ.get('SQLALCHEMY_DATABASE_URI')
     # for use with email verification
@@ -10,3 +9,5 @@ class Config:
     MAIL_USE_TLS = True
     MAIL_USERNAME = os.environ.get('EMAIL_USER')
     MAIL_PASSWORD = os.environ.get('EMAIL_PASS')
+    # to supress the warning when launching the app
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
