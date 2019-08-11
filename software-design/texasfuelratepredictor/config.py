@@ -11,3 +11,5 @@ class Config:
     MAIL_PASSWORD = os.environ.get('EMAIL_PASS')
     # to supress the warning when launching the app
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+     #for admin page
+    FLASK_ADMIN_SWATCH = 'cerulean'
