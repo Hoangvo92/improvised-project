@@ -39,12 +39,11 @@ class ClientInformation(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     fullname = db.Column(db.String(50), nullable=False)
     address1 = db.Column(db.String(100), nullable=False)
-<<<<<<< HEAD
     address2 = db.Column(db.String(100))
     city = db.Column(db.String(100), nullable=False)
     state = db.Column(db.String(100), nullable=False)
     zipcode = db.Column(db.String(10), nullable=False)
-    person_name = db.Column(db.String(120), db.ForeignKey('user.username'), nullable=False)
+    client = db.Column(db.Integer, db.ForeignKey('user.email'), nullable=False)
 
      # magic method
     def __repr__(self):
@@ -54,25 +53,13 @@ class ClientInformation(db.Model, UserMixin):
 class Quote(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     gallon = db.Column(db.Integer)
-    address= db.Column(db.String(100), unique=True, nullable=False, default='')
-    datedelivery = db.Column(db.DateTime, nullable=False, default=datetime.utcnow) 
-    suggested_price = db.Column(db.Integer)
-    total_price = db.Column(db.Integer)
-    client_name = db.Column(db.String(120), db.ForeignKey('user.username'), nullable=False)
-
-
+    address= db.Column(db.String(100), nullable=False, default='')
+    datedelivery = db.Column(db.Date, nullable=False) 
+    datepost = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    suggested_price = db.Column(db.Float(10,3))
+    total_price = db.Column(db.Float(10,3))
+    client_em = db.Column(db.String(120), db.ForeignKey('user.email'), nullable=False)
 
     # magic method
     def __repr__(self):
         return f"Quote('{self.gallon}','{self.address}', '{self.datedelivery}', '{self.total_price}','{self.client_name}')"
-=======
-    address2 = db.Column(db.String(100), nullable=True)
-    city = db.Column(db.String(100), nullable=True)
-    state = db.Column(db.String(2), nullable=False)
-    zipcode = db.Column(db.String(9), nullable=True)
-    client_username = db.Column(db.String(20), db.ForeignKey('user.username'), nullable=True)
-
-    # magic method
-    def __repr__(self):
-        return f"Profile('{self.fullname}','{self.address1}', '{self.address2}', '{self.city}, '{self.state}, '{self.zipcode})"
->>>>>>> a6b87c9c110d3ca901691e47f0b41ea94cae0cd2
