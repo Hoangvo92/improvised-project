@@ -1,0 +1,74 @@
+{% extends "layout.html" %}
+{% block content %}
+    <article class = "media content-section">
+        <div class ="media-body">
+            <div class="article-metadata">
+                <a class="mr-2" href="#">Client: {{user.fullname}} </a>
+           
+                    <div>
+                        <button type="button" id="deleteButton" class="btn btn-danger btn-sm m-1" data-toggle="modal" data-target="#deleteModal"> Delete </button>
+                    </div>
+              
+            </div>
+            <p id="noDelete"></p>
+            <ul>
+                <li>Gallon:            {{quote.gallon}}</li>
+                <li>Address:           {{quote.address}}</li>
+                <li>Date delivery:     {{quote.datedelivery}}</li>
+                <li>Suggested price: $ {{quote.suggested_price}}</li> 
+                <li>Total price:     $ {{quote.total_price}}</li>
+            </ul>            
+        </div>
+
+    </article> 
+     <!-- Modal -->
+    <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="deleteModalLabel">Do you want to Delete this record?</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+              <form action="{{ url_for('fuel.delete_quote', quote_id=quote.id) }}" method="POST">
+                <input class="btn btn-danger" type="submit" value="Delete">
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>     
+<script type="text/javascript">
+ var today = new Date();
+
+ var deliver = new Date("{{quote.datedelivery}}");
+ var day = deliver.getDate()
+ var month = deliver.getMonth();
+    if (day < 2){
+        if (month==0){
+          deliver.setMonth(11);
+        }else{
+          deliver.setMonth(month-1);
+        }
+            
+        deliver.setDate(30 + day - 2);
+    } else{
+         deliver.setDate(day-2);
+    }
+    console.log(deliver);
+ if ( today > deliver){
+  document.getElementById("deleteButton").disabled = true;
+  document.getElementById('noDelete').innerHTML="You cannot delete the quote at this time!";
+ }
+ else
+ {
+  document.getElementById('noDelete').innerHTML="You can still delete this quote in 3 days before the delivery time!";
+ }
+
+
+
+
+</script>
+{% endblock content %}

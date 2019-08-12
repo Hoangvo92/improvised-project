@@ -1,0 +1,200 @@
+<!-- template inheritence -->
+{% extends "layout.html" %}
+{% block content %}
+
+<div class="content-section">
+    <form name="form1" method="POST" action="">
+        {{ form.hidden_tag() }}
+        <fieldset class="form-group">
+            <legend class="border_bottom mb-4" style="color:  hsl(195, 100%, 60%); opacity: 0.6">{{ legend }}</legend>
+
+            <!-- gallon -->
+            <div class="form-group">
+                {{ form.gallon.label(class="form-control-label") }}
+                {% if form.gallon.errors %}
+                    {{ form.gallon(class="form-control form-control-lg is-invalid") }}
+                    <div class="invalid-feedback">
+                        {% for error in form.gallon.errors %}
+                            <span>{{ error }}</span> 
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    {{ form.gallon(class="form-control form-control-lg", 
+                                   id="gallon", 
+                                   onkeyup="validateEnter()",
+                                   style="background-color:transparent") }}
+                {% endif %}
+            </div>
+
+            <!-- address -->
+            <div class="form-group">
+                {{ form.address.label(class="form-control-label") }}
+                {% set my_string1 = [client.address1, client.address2]|join(' ') %}
+                {% set my_string = [my_string1, client.city, client.state, client.zipcode]|join(', ') %}
+                {{ form.address(class="form-control form-control-lg",
+                                 value=my_string, readonly="readonly", style="background-color:transparent",
+                                 id="address") }}
+            </div>
+
+            <!-- date delivery -->
+            <div class="form-group">
+                {{ form.d_deliver.label(class="form-control-label") }}
+                {{form.d_deliver(class="form-control form-control-lg",
+                                   type="date", id="date", onload="getDate()", onkeyup="validateEnter()",
+                                   style="border: 1px solid; border-radius: 5px; border-color: #ced4da; background-color:transparent",
+                                    min="2019-07-01", max="2029-08-02") }}
+               <!--<input type="date" name="date" style="border: 1px solid; border-radius: 5px; border-color: #ced4da"
+                     min="2019-07-01" max="2029-08-02"> --> 
+                  
+            </div>
+            <div>
+                <p id="reminderDate"></p>
+            </div>
+
+            <!--set price-->
+            <div >
+                    <button name="Get Price" id="get_price"
+                            class="btn btn-primary" type="button" onclick="setPrice(); return false; " 
+                        disabled="disabled"
+                          >Get Price</button>
+            </div>
+
+    
+          
+            <!-- suggested price -->
+            <div class="form-group">
+                {{ form.suggestp.label(class="form-control-label") }} $
+
+                {{ form.suggestp(class="form-control form-control-lg",
+                                 value=suggestp, type="Number", step="0.01",
+                                 id="suggestprice", readonly="readonly") }}
+            </div>
+
+            <!-- total price -->
+            <div class="form-group">
+               {{ form.totalp.label(class="form-control-label") }} $
+                {{ form.totalp(class="form-control form-control-lg", 
+                               value=totalp, type="Number", step="0.01",
+                               id="totalprice", readonly="readonly"
+                               ) }}
+            </div>
+        </fieldset>
+
+        <!-- submit -->
+        <div class="form-group">
+            {{ form.submit(class="btn btn-outline-info", id="submitbutton", disabled="disabled") }}
+        </div>
+       
+    </form>
+</div>
+
+<!--
+<script  type='text/javascript' src="js/pricing_module.js" ></script>  -->
+<script type="text/javascript">
+    /* get date for default value*/
+   
+    //Prepare date values for function
+
+    var validdate = new Date();
+    var day = validdate.getDate();
+    var month = validdate.getMonth();
+    if (day>27){
+            validdate.setMonth(validdate.getMonth()+1);
+            validdate.setDate(2 + 28 - day);
+    } else{
+        if (day==27 && month==1)
+        {
+            validdate.setMonth(2);
+            validdate.setDate(2);
+        } else{
+            validdate.setDate(day+2);
+        }
+
+    }
+    document.querySelector("#date").value = validdate.toISOString().substr(0,10);
+
+   
+    
+    /* Pricing module*/
+
+    var totalp=0, suggestp=0;
+    function getNumber(stringID){
+        var strValue=document.getElementById(stringID).value;
+        var numValue = Number(strValue);//change string into number
+        return numValue;
+    }
+    function getMonthNumber(stringID){
+        var dateform = document.getElementById(stringID).value;
+        var datedata = new Date(dateform);
+        var month = 1+ datedata.getMonth(); //the getMonth run fron 0->11
+        return month;
+    }
+
+
+    function pricing_calculation(){
+        //declare variables
+        var gallon = getNumber("gallon"),
+             month = getMonthNumber("date");
+
+        var location_f, history_f, gallon_f, 
+             fluctuation_f, margin, 
+             suggested_price, total_price,
+             company_f = 0.1, current_p = 1.5;
+        //assign values for factors
+        var temp = "{{ client.state }}";
+        if (temp =="TX"){  location_f =0.02;} else { location_f=0.04; }
+        temp = {{clientHistory}};
+        if (temp ==0){ history_f = 0;}  else { history_f =0.01;}
+        if (gallon > 1000){ gallon_f = 0.02;} else {   gallon_f = 0.03; }
+        if (month>5 && month<9){ fluctuation_f = 0.04;} else {fluctuation_f = 0.03; } 
+        //calculation
+        margin = current_p*(location_f-history_f+gallon_f+company_f+fluctuation_f);
+        suggested_price = current_p + margin;
+        total_price = (+gallon) * suggested_price;
+        suggested_price= Math.round(suggested_price*100)/100;
+        total_price = Math.round(total_price*100)/100;
+        document.getElementById("suggestprice").value = Number(suggested_price);
+        document.getElementById("totalprice").value = Number(total_price); 
+        enableSubmit(); 
+    }
+
+
+    //For buttons
+    //for submit button
+    function enableSubmit() {
+            document.getElementById('gallon').readOnly = true;
+            document.getElementById('date').readOnly = true;
+            document.getElementById("submitbutton").disabled = false;
+        }
+    
+    //for set_price button
+    function checkGallon(){
+        var entergallon = Number(document.getElementById("gallon").value);
+       
+        if (entergallon >0){           
+            document.getElementById('get_price').disabled= false;
+        } else {
+            document.getElementById('get_price').disabled = true; 
+        }
+    }
+    function checkDateBeforePrice(){
+        var enterdate = document.getElementById("date").value;
+        enterdate= new Date(enterdate);
+        if (enterdate<validdate ){
+                document.getElementById('reminderDate').innerHTML="Please choose at least 3 days later from today for time delivery";
+            } else {   
+                document.getElementById('reminderDate').innerHTML="";   
+                pricing_calculation();        
+            }
+    }
+    function validateEnter(){
+        checkGallon();
+    }
+
+    function setPrice(){
+        checkDateBeforePrice();
+    }
+
+
+</script>
+{% endblock content %}
